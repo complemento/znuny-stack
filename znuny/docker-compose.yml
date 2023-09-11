@@ -11,6 +11,13 @@
 # 
 # URL Packages
 # Ref.: https://download.znuny.org/releases/itsm/packages6/
+#
+# Hosts tags
+# webserver = true
+# database = true
+# elasticsearch = true
+# grafana = true
+
 
 version: '3.8'
 
