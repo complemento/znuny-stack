@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   server:
@@ -42,8 +42,8 @@ services:
 
 networks:
   web:
-    external:
-      name: web
+    external: true
+    name: web
 
 volumes:
   log:
