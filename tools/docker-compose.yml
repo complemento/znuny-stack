@@ -1,0 +1,70 @@
+version: '3'
+
+services:
+
+  # database helper
+  pma: 
+    image: phpmyadmin/phpmyadmin
+    environment:
+      #PMA_ARBITRARY: 1
+      #PMA_HOSTS: dbtest_database,dbreplica_database
+      PMA_HOSTS: znuny_database
+      PMA_ABSOLUTE_URI: https://${WEBSERVER_FQDN}/pma/
+      UPLOAD_LIMIT: '512M'
+      MEMORY_LIMIT: '1G'
+      MAX_EXECUTION_TIME: 1200
+    networks:
+      - dbnet1
+      - web
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels:
+      - traefik.enable=true
+      - traefik.port=80
+      - traefik.frontend.rule=PathPrefixStrip:/pma
+      - traefik.protocol=http
+      - traefik.docker.network=web
+      #- traefik.frontend.auth.basic.users=pma:<pwdhash>
+      
+  # elasticsearch helper
+  elastichq:
+    image: elastichq/elasticsearch-hq
+    environment:
+      HQ_DEFAULT_URL: http://znuny_elasticsearch:9200
+    restart: always
+    networks:
+      - dbnet1
+      - web
+    deploy:
+      mode: replicated
+      replicas: 0
+      labels:
+      - traefik.enable=true
+      - traefik.port=5000
+      - traefik.frontend.rule=PathPrefixStrip:/elastichq
+      - traefik.protocol=http
+      - traefik.docker.network=web
+      #- traefik.frontend.auth.basic.users=pma:<pwdhash>
+  
+  # LDAP/AD helper
+  testldap:
+    image: osixia/openldap
+    deploy:
+      mode: replicated
+      replicas: 0
+  
+  # network tests (ping, telnet, ncat, ...)
+  nettools:
+    image: wbitt/network-multitool
+    deploy:
+      mode: replicated
+      replicas: 0
+  
+networks:
+  dbnet1:
+    external:
+      name: znuny_default
+  web:
+    external: 
+      name: web
